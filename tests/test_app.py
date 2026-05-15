@@ -1,15 +1,18 @@
 import pytest
+from copy import deepcopy
 from fastapi.testclient import TestClient
 from src.app import app, activities
 
 client = TestClient(app)
+INITIAL_ACTIVITIES = deepcopy(activities)
 
 @pytest.fixture(autouse=True)
 def reset_activities():
     # Arrange: Reset the in-memory activities before each test
-    for activity in activities.values():
-        if isinstance(activity.get("participants"), list):
-            activity["participants"] = activity["participants"][:2]  # Reset to initial two participants
+    for name, activity in activities.items():
+        original_activity = INITIAL_ACTIVITIES.get(name, {})
+        if isinstance(original_activity.get("participants"), list):
+            activity["participants"] = deepcopy(original_activity["participants"])
 
 
 def test_get_activities():
